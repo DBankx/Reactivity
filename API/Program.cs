@@ -25,6 +25,8 @@ namespace API
                 {
                     var context = services.GetRequiredService<DataContext>();
                     context.Database.Migrate();
+                    //seed the manually generated activity data from the persistance Classlib
+                    Seed.SeedData(context);
                 }
                 catch (Exception ex)
                 {

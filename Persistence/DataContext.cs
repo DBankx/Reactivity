@@ -1,6 +1,7 @@
 ﻿using Domain;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Diagnostics;
 
 namespace Persistence
 {
@@ -12,6 +13,7 @@ namespace Persistence
         }
 
         public DbSet<Value> Values { get; set; }
+        public DbSet<Domain.Activity> Activities { get; set; }
 
         //to add data to the db manually (seed data)
         protected override void OnModelCreating(ModelBuilder builder)
@@ -30,5 +32,7 @@ namespace Persistence
                 Name = "Value 103"
             });
         }
+
+        
     }
 }
