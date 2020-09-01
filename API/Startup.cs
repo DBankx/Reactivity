@@ -29,6 +29,13 @@ namespace API
         {
             services.AddControllers();
             services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            /*services.AddCors(options => {
+                options.AddPolicy("AddPolicy", policy =>
+                {
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3001");
+                });
+            });*/
+            services.AddCors(opt => { opt.AddDefaultPolicy(builder => { builder.WithOrigins("*"); }); });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,6 +51,8 @@ namespace API
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {
