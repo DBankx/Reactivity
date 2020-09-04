@@ -18,8 +18,13 @@ function App() {
       const res = await axios.get<IActivity[]>(
         'http://localhost:5000/api/activities'
       );
-      console.log(res.data);
-      setActivities(res.data);
+      //loop through the data and change the date time to remove presicion
+      let activities: IActivity[] = [];
+      res.data.forEach((activity) => {
+        activity.date = activity.date.split('.')[0];
+        activities.push(activity);
+      });
+      setActivities(activities);
     } catch (err) {
       console.log('There was a problem');
     }
@@ -28,12 +33,35 @@ function App() {
   //filters the activities array for an activity and set that as the new selected activity
   const handleSelectedActivity = (id: string) => {
     setSelectedActivity(activities.filter((activity) => activity.id === id)[0]);
+    setEditMode(false);
   };
 
   //function to create activity by setting edit action to true
   const handleOpenCreateForm = () => {
     setSelectedActivity(null);
     setEditMode(true);
+  };
+
+  //function to submit an activity
+  const handleCreateActivity = (activity: IActivity) => {
+    setActivities([...activities, activity]);
+    setSelectedActivity(activity);
+    setEditMode(false);
+  };
+
+  //function to edit activity
+  const handleEditActivity = (activity: IActivity) => {
+    setActivities([
+      ...activities.filter((x) => x.id !== activity.id),
+      activity
+    ]);
+    setSelectedActivity(activity);
+    setEditMode(false);
+  };
+
+  //delete an activity
+  const handleDeleteActivity = (id: string) => {
+    setActivities([...activities.filter((activity) => activity.id !== id)]);
   };
 
   useEffect(() => {
@@ -51,6 +79,9 @@ function App() {
           editMode={editMode}
           setEditMode={setEditMode}
           setSelectedActivity={setSelectedActivity}
+          createActivity={handleCreateActivity}
+          editActivity={handleEditActivity}
+          deleteActivity={handleDeleteActivity}
         />
       </Container>
     </Fragment>

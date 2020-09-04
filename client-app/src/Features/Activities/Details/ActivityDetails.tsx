@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Card, Icon, Image, Button } from 'semantic-ui-react';
+import React from 'react';
+import { Card, Image, Button } from 'semantic-ui-react';
 import IActivity from '../../../App/Models/activitiy';
 
 interface IProps {

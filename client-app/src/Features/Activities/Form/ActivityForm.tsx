@@ -2,17 +2,22 @@ import React, { useState, FormEvent } from 'react';
 import { Segment, Form, Button } from 'semantic-ui-react';
 import IActivity from '../../../App/Models/activitiy';
 import axios from 'axios';
+import { v4 as uuid } from 'uuid';
 
 interface IProps {
   setEditMode: (editMode: boolean) => void;
   activity: IActivity;
+  createActivity: (activity: IActivity) => void;
+  editActivity: (activity: IActivity) => void;
 }
 
 //renamed acitivity to intialformstate
 
 const ActivityForm: React.FC<IProps> = ({
   setEditMode,
-  activity: initialFormState
+  activity: initialFormState,
+  createActivity,
+  editActivity
 }) => {
   //this function initializes the form with the activity passed down
   const initializeForm = () => {
@@ -40,7 +45,8 @@ const ActivityForm: React.FC<IProps> = ({
     setAcitivity({ ...activity, [name]: value });
   }
 
-  const submitToApi = async (activity: IActivity) => {
+  //function to edit an activity
+  const handleEditActivity = async (activity: IActivity) => {
     const config = {
       headers: {
         'Content-Type': 'application/json'
@@ -60,14 +66,45 @@ const ActivityForm: React.FC<IProps> = ({
     }
   };
 
+  const handleCreateActivity = async (activity: IActivity) => {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+
+    try {
+      await axios.post(
+        `http://localhost:5000/api/activities`,
+        activity,
+        config
+      );
+      console.log('Success');
+    } catch (err) {
+      console.error(err.message);
+      console.log('Error Occured');
+    }
+  };
+
   const handleSubmit = () => {
-    submitToApi(activity);
+    if (activity.id.length > 0) {
+      handleEditActivity(activity);
+      editActivity(activity);
+    } else {
+      let newActivity = {
+        ...activity,
+        id: uuid()
+      };
+      handleCreateActivity(newActivity);
+      console.log(newActivity);
+      createActivity(newActivity);
+    }
   };
 
   return (
     <Segment clearing>
       <Form
-        onSubmit={(e: any) => {
+        onSubmit={(e: FormEvent<HTMLFormElement>) => {
           e.preventDefault();
           handleSubmit();
         }}
@@ -92,7 +129,7 @@ const ActivityForm: React.FC<IProps> = ({
           name='category'
         />
         <Form.Input
-          type='date'
+          type='datetime-local'
           placeholder='Date'
           value={activity.date}
           onChange={handleActivity}
