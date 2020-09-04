@@ -1,8 +1,8 @@
 import React, { useState, FormEvent } from 'react';
 import { Segment, Form, Button } from 'semantic-ui-react';
 import IActivity from '../../../App/Models/activitiy';
-import axios from 'axios';
 import { v4 as uuid } from 'uuid';
+import Activities from '../../../App/api/agent';
 
 interface IProps {
   setEditMode: (editMode: boolean) => void;
@@ -45,60 +45,33 @@ const ActivityForm: React.FC<IProps> = ({
     setAcitivity({ ...activity, [name]: value });
   }
 
-  //function to edit an activity
-  const handleEditActivity = async (activity: IActivity) => {
-    const config = {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
+  const [submitting, setSubmitting] = useState(false);
 
+  //function to handle the submit to api
+  const handleSubmitActivityToApi = async (activity: IActivity) => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/activities/${activity.id}`,
-        activity,
-        config
-      );
-      console.log('Success');
-    } catch (err) {
-      console.error(err.message);
-      console.log('Error Occured');
-    }
-  };
-
-  const handleCreateActivity = async (activity: IActivity) => {
-    const config = {
-      headers: {
-        'Content-Type': 'application/json'
+      if (activity.id.length === 0) {
+        let newActivity = {
+          ...activity,
+          id: uuid()
+        };
+        setSubmitting(true);
+        await Activities.create(newActivity)
+          .then(() => createActivity(newActivity))
+          .then(() => setSubmitting(false));
+      } else {
+        setSubmitting(true);
+        await Activities.update(activity)
+          .then(() => editActivity(activity))
+          .then(() => setSubmitting(false));
       }
-    };
-
-    try {
-      await axios.post(
-        `http://localhost:5000/api/activities`,
-        activity,
-        config
-      );
-      console.log('Success');
     } catch (err) {
-      console.error(err.message);
-      console.log('Error Occured');
+      console.log(err);
     }
   };
 
   const handleSubmit = () => {
-    if (activity.id.length > 0) {
-      handleEditActivity(activity);
-      editActivity(activity);
-    } else {
-      let newActivity = {
-        ...activity,
-        id: uuid()
-      };
-      handleCreateActivity(newActivity);
-      console.log(newActivity);
-      createActivity(newActivity);
-    }
+    handleSubmitActivityToApi(activity);
   };
 
   return (
@@ -147,7 +120,13 @@ const ActivityForm: React.FC<IProps> = ({
           onChange={handleActivity}
           name='venue'
         />
-        <Button floated='right' positive type='submit' content='submit' />
+        <Button
+          floated='right'
+          positive
+          type='submit'
+          content='submit'
+          loading={submitting ? true : false}
+        />
         <Button
           floated='right'
           onClick={() => setEditMode(false)}
