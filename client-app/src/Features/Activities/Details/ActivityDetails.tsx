@@ -1,42 +1,35 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Card, Image, Button } from 'semantic-ui-react';
-import IActivity from '../../../App/Models/activitiy';
+import { observer } from 'mobx-react-lite';
+import ActivityStore from '../../../App/stores/activityStore';
 
-interface IProps {
-  activity: IActivity;
-  setEditMode: (editMode: boolean) => void;
-  setSelectedActivity: (activity: IActivity | null) => void;
-}
-
-const ActivityDetails: React.FC<IProps> = ({
-  activity,
-  setEditMode,
-  setSelectedActivity
-}) => {
+const ActivityDetails: React.FC = () => {
+  const activityStore = useContext(ActivityStore);
+  const { selectedActivity, cancelSelectedActivity } = activityStore;
   return (
     <Card fluid>
       <Image
-        src={`/Assests/categoryImages/${activity.category}.jpg`}
+        src={`/Assests/categoryImages/${selectedActivity!.category}.jpg`}
         wrapped
         ui={false}
       />
       <Card.Content>
-        <Card.Header>{activity.title}</Card.Header>
+        <Card.Header>{selectedActivity!.title}</Card.Header>
         <Card.Meta>
-          <span>{activity.date}</span>
+          <span>{selectedActivity!.date}</span>
         </Card.Meta>
-        <Card.Description>{activity.description}</Card.Description>
+        <Card.Description>{selectedActivity!.description}</Card.Description>
       </Card.Content>
       <Card.Content extra>
         <Button.Group widths={2}>
           <Button
             basic
             color='blue'
-            onClick={() => setEditMode(true)}
+            onClick={() => activityStore.openEditForm(selectedActivity!.id)}
             content='Edit'
           />
           <Button
-            onClick={() => setSelectedActivity(null)}
+            onClick={() => cancelSelectedActivity()}
             basic
             color='grey'
             content='Cancel'
@@ -47,4 +40,4 @@ const ActivityDetails: React.FC<IProps> = ({
   );
 };
 
-export default ActivityDetails;
+export default observer(ActivityDetails);

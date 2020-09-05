@@ -1,28 +1,18 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useContext } from 'react';
 import { Segment, Form, Button } from 'semantic-ui-react';
 import IActivity from '../../../App/Models/activitiy';
 import { v4 as uuid } from 'uuid';
-import Activities from '../../../App/api/agent';
-
-interface IProps {
-  setEditMode: (editMode: boolean) => void;
-  activity: IActivity;
-  createActivity: (activity: IActivity) => void;
-  editActivity: (activity: IActivity) => void;
-}
+import ActivityStore from '../../../App/stores/activityStore';
+import { observer } from 'mobx-react-lite';
 
 //renamed acitivity to intialformstate
 
-const ActivityForm: React.FC<IProps> = ({
-  setEditMode,
-  activity: initialFormState,
-  createActivity,
-  editActivity
-}) => {
+const ActivityForm: React.FC = () => {
+  const activityStore = useContext(ActivityStore);
   //this function initializes the form with the activity passed down
   const initializeForm = () => {
-    if (initialFormState) {
-      return initialFormState;
+    if (activityStore.selectedActivity!) {
+      return activityStore.selectedActivity!;
     } else {
       return {
         id: '',
@@ -45,8 +35,6 @@ const ActivityForm: React.FC<IProps> = ({
     setAcitivity({ ...activity, [name]: value });
   }
 
-  const [submitting, setSubmitting] = useState(false);
-
   //function to handle the submit to api
   const handleSubmitActivityToApi = async (activity: IActivity) => {
     try {
@@ -55,15 +43,9 @@ const ActivityForm: React.FC<IProps> = ({
           ...activity,
           id: uuid()
         };
-        setSubmitting(true);
-        await Activities.create(newActivity)
-          .then(() => createActivity(newActivity))
-          .then(() => setSubmitting(false));
+        activityStore.createActivity(newActivity);
       } else {
-        setSubmitting(true);
-        await Activities.update(activity)
-          .then(() => editActivity(activity))
-          .then(() => setSubmitting(false));
+        activityStore.editActivity(activity);
       }
     } catch (err) {
       console.log(err);
@@ -125,11 +107,11 @@ const ActivityForm: React.FC<IProps> = ({
           positive
           type='submit'
           content='submit'
-          loading={submitting ? true : false}
+          loading={activityStore.submitting}
         />
         <Button
           floated='right'
-          onClick={() => setEditMode(false)}
+          onClick={() => activityStore.cancelEditMode()}
           type='button'
           content='cancel'
         />
@@ -138,4 +120,4 @@ const ActivityForm: React.FC<IProps> = ({
   );
 };
 
-export default ActivityForm;
+export default observer(ActivityForm);
