@@ -1,7 +1,11 @@
-import { observable, action, computed } from 'mobx';
+import { observable, action, computed, configure, runInAction } from 'mobx';
 import { createContext, SyntheticEvent } from 'react';
 import IActivity from '../Models/activitiy';
 import Activities from '../api/agent';
+
+//configure mobx
+configure({ enforceActions: 'always' });
+//runInAction is to make all state changes be an action, so it cant be changed anywhere outside an action
 
 //activity store
 class ActivityStore {
@@ -25,13 +29,17 @@ class ActivityStore {
     this.loadingInitial = true;
     try {
       const activities: IActivity[] = await Activities.list();
-      activities.forEach((activity) => {
-        activity.date = activity.date.split('.')[0];
-        this.activityRegistry.set(activity.id, activity);
+      runInAction('loading activities', () => {
+        activities.forEach((activity) => {
+          activity.date = activity.date.split('.')[0];
+          this.activityRegistry.set(activity.id, activity);
+        });
+        this.loadingInitial = false;
       });
-      this.loadingInitial = false;
     } catch (err) {
-      this.loadingInitial = false;
+      runInAction('load activities error', () => {
+        this.loadingInitial = false;
+      });
       console.log(err);
     }
   };
@@ -52,16 +60,20 @@ class ActivityStore {
     this.submitting = true;
     try {
       await Activities.create(activity);
-      // adding the new activity to the activities dictionary
-      this.activityRegistry.set(activity.id, activity);
-      // making the newly created activity be the currently selected activity
-      this.selectedActivity = activity;
-      // cancling editMode
-      this.editMode = false;
-      // stop loading
-      this.submitting = false;
+      runInAction('create activity', () => {
+        // adding the new activity to the activities dictionary
+        this.activityRegistry.set(activity.id, activity);
+        // making the newly created activity be the currently selected activity
+        this.selectedActivity = activity;
+        // cancling editMode
+        this.editMode = false;
+        // stop loading
+        this.submitting = false;
+      });
     } catch (err) {
-      this.submitting = false;
+      runInAction('create activity error', () => {
+        this.submitting = false;
+      });
       console.log(err);
     }
   };
@@ -78,13 +90,17 @@ class ActivityStore {
     this.submitting = true;
     try {
       await Activities.update(activity);
-      this.activityRegistry.set(activity.id, activity);
-      this.selectedActivity = activity;
-      this.editMode = false;
-      this.submitting = false;
+      runInAction('edit activities', () => {
+        this.activityRegistry.set(activity.id, activity);
+        this.selectedActivity = activity;
+        this.editMode = false;
+        this.submitting = false;
+      });
     } catch (err) {
-      this.submitting = false;
-      console.log(err);
+      runInAction('edit activities error', () => {
+        this.submitting = false;
+        console.log(err);
+      });
     }
   };
 
@@ -108,10 +124,14 @@ class ActivityStore {
     this.target = event.currentTarget.name;
     try {
       await Activities.delete(id);
-      this.activityRegistry.delete(id);
-      this.submitting = false;
+      runInAction('delete activity', () => {
+        this.activityRegistry.delete(id);
+        this.submitting = false;
+      });
     } catch (err) {
-      this.submitting = false;
+      runInAction('delete activity error', () => {
+        this.submitting = false;
+      });
       console.log(err);
     }
   };
