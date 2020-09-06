@@ -1,32 +1,52 @@
-import React, { useState, FormEvent, useContext } from 'react';
+import React, { useState, FormEvent, useContext, useEffect } from 'react';
 import { Segment, Form, Button } from 'semantic-ui-react';
 import IActivity from '../../../App/Models/activitiy';
 import { v4 as uuid } from 'uuid';
 import ActivityStore from '../../../App/stores/activityStore';
 import { observer } from 'mobx-react-lite';
+import { RouteComponentProps } from 'react-router-dom';
 
-//renamed acitivity to intialformstate
+interface DetailParams {
+  id: string;
+}
 
-const ActivityForm: React.FC = () => {
+const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({
+  match,
+  history
+}) => {
   const activityStore = useContext(ActivityStore);
-  //this function initializes the form with the activity passed down
-  const initializeForm = () => {
-    if (activityStore.selectedActivity!) {
-      return activityStore.selectedActivity!;
-    } else {
-      return {
-        id: '',
-        title: '',
-        category: '',
-        description: '',
-        date: '',
-        city: '',
-        venue: ''
-      };
-    }
-  };
 
-  const [activity, setAcitivity] = useState<IActivity>(initializeForm);
+  const [activity, setAcitivity] = useState<IActivity>({
+    id: '',
+    title: '',
+    category: '',
+    description: '',
+    date: '',
+    city: '',
+    venue: ''
+  });
+
+  //load activity to get activity from state or api, incase of a refresh, then set the activity state to the activity
+  useEffect(() => {
+    //check if there is an id in the url && there is not activity currently in the local state
+    if (match.params.id && activity.id.length === 0) {
+      activityStore
+        .loadActivity(match.params.id)
+        .then(
+          () => activityStore.activity && setAcitivity(activityStore.activity)
+        );
+    }
+    //cleanup function to clear activity from state
+    return () => {
+      activityStore.clearActivity();
+    };
+  }, [
+    activityStore.loadActivity,
+    match.params.id,
+    activityStore,
+    activity.id.length,
+    activityStore.clearActivity
+  ]);
 
   function handleActivity(
     e: FormEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -43,9 +63,13 @@ const ActivityForm: React.FC = () => {
           ...activity,
           id: uuid()
         };
-        activityStore.createActivity(newActivity);
+        activityStore.createActivity(newActivity).then(() => {
+          history.push(`/activities/${newActivity.id}`);
+        });
       } else {
-        activityStore.editActivity(activity);
+        activityStore.editActivity(activity).then(() => {
+          history.push(`/activities/${activity.id}`);
+        });
       }
     } catch (err) {
       console.log(err);

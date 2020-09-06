@@ -1,14 +1,19 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Grid } from 'semantic-ui-react';
 import ActivityList from './ActivityList';
-import ActivityDetails from '../Details/ActivityDetails';
-import ActivityForm from '../Form/ActivityForm';
 import { observer } from 'mobx-react-lite';
 import ActivityStore from '../../../App/stores/activityStore';
+import Spinner from '../../../App/Layout/Spinner';
 
 const ActivityDashboard: React.FC = () => {
   const activityStore = useContext(ActivityStore);
-  const { editMode, selectedActivity } = activityStore;
+
+  useEffect(() => {
+    activityStore.loadActivities();
+  }, [activityStore]);
+
+  if (activityStore.loadingInitial)
+    return <Spinner content='Loading Activities...' />;
   return (
     <div>
       <Grid>
@@ -16,13 +21,7 @@ const ActivityDashboard: React.FC = () => {
           <ActivityList />
         </Grid.Column>
         <Grid.Column width={6}>
-          {selectedActivity && !editMode && <ActivityDetails />}
-          {editMode && (
-            // key causes a re render of the component
-            <ActivityForm
-              key={selectedActivity ? selectedActivity.id || 0 : null}
-            />
-          )}
+          <h2>Activity Filters</h2>
         </Grid.Column>
       </Grid>
     </div>
