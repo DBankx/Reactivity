@@ -10,17 +10,32 @@ configure({ enforceActions: 'always' });
 //activity store
 class ActivityStore {
   @observable activityRegistry = new Map();
-  @observable activities: IActivity[] = [];
   @observable loadingInitial: boolean = false;
   @observable activity: IActivity | null = null;
-  @observable editMode: boolean = false;
   @observable submitting: boolean = false;
   @observable target: string = '';
 
   //====computed=====
-  @computed get activitiesByDate(): IActivity[] {
-    return Array.from(this.activityRegistry.values()).sort(
+  @computed get activitiesByDate() {
+    return this.groupActivitiesByDate(
+      Array.from(this.activityRegistry.values())
+    );
+  }
+
+  groupActivitiesByDate(activities: IActivity[]) {
+    const sortedActivities = activities.sort(
       (a, b) => Date.parse(a.date) - Date.parse(b.date)
+    );
+
+    //reduce the array to group them by date
+    return Object.entries(
+      sortedActivities.reduce((activities, activity) => {
+        const date = activity.date.split('T')[0];
+        activities[date] = activities[date]
+          ? [...activities[date], activity]
+          : [activity];
+        return activities;
+      }, {} as { [key: string]: IActivity[] })
     );
   }
 
@@ -43,23 +58,6 @@ class ActivityStore {
       console.log(err);
     }
   };
-
-  //get an activity
-  // @action getActivity = async (id: string) => {
-  //   this.activityLoading = true;
-  //   try {
-  //     const activity = await Activities.details(id);
-  //     runInAction('load activity', () => {
-  //       this.activity = activity;
-  //       this.activityLoading = false;
-  //     });
-  //   } catch (err) {
-  //     runInAction('load activity error', () => {
-  //       this.activityLoading = false;
-  //     });
-  //     console.log(err);
-  //   }
-  // };
 
   //gets the activity from the dicitonary
   getActivity = (id: string) => {
@@ -96,7 +94,6 @@ class ActivityStore {
   // select an activity from the activities array
   @action selectActivity = (id: string) => {
     this.activity = this.activityRegistry.get(id);
-    this.editMode = false;
   };
 
   // cancel selected activity
@@ -114,8 +111,6 @@ class ActivityStore {
         this.activityRegistry.set(activity.id, activity);
         // making the newly created activity be the currently selected activity
         this.activity = activity;
-        // cancling editMode
-        this.editMode = false;
         // stop loading
         this.submitting = false;
       });
@@ -129,7 +124,6 @@ class ActivityStore {
 
   // open the create form
   @action openCreateForm = () => {
-    this.editMode = true;
     // removing the selected activity
     this.activity = null;
   };
@@ -142,7 +136,6 @@ class ActivityStore {
       runInAction('edit activities', () => {
         this.activityRegistry.set(activity.id, activity);
         this.activity = activity;
-        this.editMode = false;
         this.submitting = false;
       });
     } catch (err) {
@@ -151,17 +144,6 @@ class ActivityStore {
         console.log(err);
       });
     }
-  };
-
-  // cancel edit mode
-  @action cancelEditMode = () => {
-    this.editMode = false;
-  };
-
-  // open the edit form
-  @action openEditForm = (id: string) => {
-    this.activity = this.activityRegistry.get(id);
-    this.editMode = true;
   };
 
   // delete an activity
