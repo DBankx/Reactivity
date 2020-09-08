@@ -13,6 +13,7 @@ import {
 } from 'react-router-dom';
 import ActivityForm from '../../Features/Activities/Form/ActivityForm';
 import ActivityDetails from '../../Features/Activities/Details/ActivityDetails';
+import NotFound from './NotFound';
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
   return (
@@ -24,8 +25,8 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
         render={() => (
           <Fragment>
             <Navbar />
-            <Switch>
-              <Container style={{ marginTop: '7em' }}>
+            <Container style={{ marginTop: '7em' }}>
+              <Switch>
                 <Route exact path='/activities' component={ActivityDashboard} />
                 <Route
                   exact
@@ -39,8 +40,9 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
                   path={['/createActivity', '/manage/:id']}
                   component={ActivityForm}
                 />
-              </Container>
-            </Switch>
+                <Route component={NotFound} />
+              </Switch>
+            </Container>
           </Fragment>
         )}
       />

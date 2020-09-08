@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>Error Handling Middleware</Title>
+			<Author>MySelf</Author>
+			<Description>Creates an error handling middleware for api pipeline</Description>
+			<Shortcut>errorMiddleware</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="CSharp">
+				<![CDATA[public class ErrorHandlingMiddleware
+    {
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ErrorHandlingMiddleware> _logger;
+
+        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+        {
+            _next = next;
+            _logger = logger;
+        }
+
+        //checks to see if there is an exception, if there isint it passes the request unto the next middleware in the pipeline
+        public async Task Invoke(HttpContext context)
+        {
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(context, ex, _logger);
+            }
+        }
+
+        //checks the error to see if it is the rest exception i created and handles it
+        private async Task HandleExceptionAsync(HttpContext context, Exception ex, ILogger<ErrorHandlingMiddleware> logger)
+        {
+            object errors = null;
+
+            switch (ex)
+            {
+                //send the errors with the status code
+				//your exception class you created for http response goes here
+                case ($YourExceptionClass$) re:
+                    logger.LogError(ex, "REST ERROR");
+                    errors = re.Errors;
+                    context.Response.StatusCode = (int)re.Code;
+                    break;
+                    //if the error is a normal exception send back a 500 status code (Internal server error)
+                case Exception e:
+                    logger.LogError(e, "SERVER ERROR");
+                    errors = string.IsNullOrWhiteSpace(e.Message) ? "Error" : e.Message;
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    break;
+            }
+
+            context.Response.ContentType = "application/json";
+
+            //write the errors to the response object if it isint null
+            if(errors != null)
+            {
+                var result = JsonSerializer.Serialize(new
+                {
+                    errors
+                });
+
+                await context.Response.WriteAsync(result);
+            }
+        }
+    }]]>
+			</Code>
+			<Declarations>
+				<Literal>
+					<ID>YourExceptionClass</ID>
+					<ToolTip>Your exception class for getting http exceptions.</ToolTip>
+				</Literal>
+			</Declarations>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>

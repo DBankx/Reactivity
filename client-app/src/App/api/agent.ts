@@ -4,6 +4,13 @@ import IActivity from '../Models/activitiy';
 //setting the base url to get the response
 axios.defaults.baseURL = 'http://localhost:5000/api';
 
+//response interceptor
+axios.interceptors.response.use(undefined, (error) => {
+  if (error.response.status === 404) {
+    throw error.response;
+  }
+});
+
 const responseBody = (response: AxiosResponse) => response.data;
 
 //slow down the api call

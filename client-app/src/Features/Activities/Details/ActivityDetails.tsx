@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { Card, Image, Button, Grid } from 'semantic-ui-react';
 import { observer } from 'mobx-react-lite';
 import ActivityStore from '../../../App/stores/activityStore';
-import { RouteComponentProps, Link } from 'react-router-dom';
+import { RouteComponentProps, Link, Redirect } from 'react-router-dom';
 import Spinner from '../../../App/Layout/Spinner';
 import ActivityDetailedHeader from './ActivityDetailedHeader';
 import ActivityDetailedInfo from './ActivityDetailedInfo';
@@ -21,11 +21,17 @@ const ActivityDetails: React.FC<RouteComponentProps<IProps>> = ({
   const { activity, loadingInitial, loadActivity } = activityStore;
 
   useEffect(() => {
-    loadActivity(match.params.id);
-  }, [loadActivity, match.params.id]);
+    loadActivity(match.params.id).catch(() => {
+      history.push('/notFound');
+    });
+  }, [loadActivity, match.params.id, history]);
 
-  if (loadingInitial || activity === null)
+  if (loadingInitial || activity === null) {
     return <Spinner content='Loading activity...' />;
+  }
+  if (!activity) {
+    return <h2>Error</h2>;
+  }
 
   return (
     <Grid>

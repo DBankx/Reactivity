@@ -1,8 +1,11 @@
-﻿using Domain;
+﻿using Application.Errors;
+using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,6 +33,19 @@ namespace Application.Activities
             public string Venue { get; set; }
         }
 
+        public class CommandValidator: AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.Title).NotEmpty();
+                RuleFor(x => x.City).NotEmpty();
+                RuleFor(x => x.Category).NotEmpty();
+                RuleFor(x => x.Description).NotEmpty();
+                RuleFor(x => x.Venue).NotEmpty();
+                RuleFor(x => x.Date).NotEmpty();
+            }
+        }
+
         public class Handler : IRequestHandler<Command>
         {
             private readonly DataContext _context;
@@ -45,7 +61,7 @@ namespace Application.Activities
 
                 if(activity == null)
                 {
-                    throw new Exception("Activity not found");
+                    throw new RestException(HttpStatusCode.NotFound, new { activity = "Not Found" });
                 }
 
                 //update the activity to the request property
