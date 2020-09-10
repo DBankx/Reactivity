@@ -1,15 +1,37 @@
 ﻿using Domain;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Persistence
 {
     public class Seed
     {
         //adding activity to the data
-        public static void SeedData(DataContext context)
+        public static async Task SeedData(DataContext context, UserManager<ApplicationUser> userManager)
         {
+            //check to see if any user is there
+            if (!userManager.Users.Any())
+            {
+                var users = new List<ApplicationUser>
+                {
+                    new ApplicationUser {DisplayName = "Bob", UserName="bob", Email="bob@test.com"},
+
+                    new ApplicationUser {DisplayName = "Yewande", UserName="yewande", Email="menuton@gmail.com"},
+
+                    new ApplicationUser {DisplayName = "Erray", UserName="erray", Email="erray@test.com"},
+                };
+
+                //automatically saves user into user store
+                foreach(var user in users)
+                {
+                    await userManager.CreateAsync(user, "Pa$$w0rd");
+                }
+            }
+
+
             //checks to see if there isint any activity
             if (!context.Activities.Any())
             {

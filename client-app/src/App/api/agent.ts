@@ -1,14 +1,34 @@
 import axios, { AxiosResponse } from 'axios';
 import IActivity from '../Models/activitiy';
+import { history } from '../..';
+import { toast } from 'react-toastify';
 
 //setting the base url to get the response
 axios.defaults.baseURL = 'http://localhost:5000/api';
 
-//response interceptor
+//response interceptors for error handling
 axios.interceptors.response.use(undefined, (error) => {
-  if (error.response.status === 404) {
-    throw error.response;
+  //checks for network error by checking the message and if there is no response object
+  if (error.message === 'Network Error' && !error.response) {
+    toast.error('Network Error - Check your connection');
   }
+  //redirect to notfound page for bad guids
+  if (error.response.status === 404) {
+    history.push('/notfound');
+  }
+  //redirect to notfound page for invalid id guid
+  if (
+    error.response.status === 400 &&
+    error.response.config.method == 'get' &&
+    error.response.data.errors.hasOwnProperty('id')
+  ) {
+    history.push('/notfound');
+  }
+  //send a toast notification if any response is a 500 status code
+  if (error.response.status === 500) {
+    toast.error('Server error - Try reloading the page');
+  }
+  throw error;
 });
 
 const responseBody = (response: AxiosResponse) => response.data;

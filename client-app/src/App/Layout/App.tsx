@@ -14,10 +14,12 @@ import {
 import ActivityForm from '../../Features/Activities/Form/ActivityForm';
 import ActivityDetails from '../../Features/Activities/Details/ActivityDetails';
 import NotFound from './NotFound';
+import { ToastContainer } from 'react-toastify';
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
   return (
     <Fragment>
+      <ToastContainer position={'bottom-right'} />
       <Route exact path='/' component={HomePage} />
       {/* checks to see if the route is anything other than '/' and renders them */}
       <Route

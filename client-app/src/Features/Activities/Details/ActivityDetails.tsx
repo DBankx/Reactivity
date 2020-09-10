@@ -21,9 +21,7 @@ const ActivityDetails: React.FC<RouteComponentProps<IProps>> = ({
   const { activity, loadingInitial, loadActivity } = activityStore;
 
   useEffect(() => {
-    loadActivity(match.params.id).catch(() => {
-      history.push('/notFound');
-    });
+    loadActivity(match.params.id);
   }, [loadActivity, match.params.id, history]);
 
   if (loadingInitial || activity === null) {
