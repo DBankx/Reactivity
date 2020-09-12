@@ -27,6 +27,7 @@ class UserStore {
       });
       this.rootStore.commonStore.setToken(user.token);
       this.rootStore.commonStore.setAppLoaded();
+      this.rootStore.modalStore.closeModal();
       history.push('/activities');
     } catch (err) {
       throw err;
@@ -37,6 +38,32 @@ class UserStore {
     this.user = null;
     this.rootStore.commonStore.deleteToken();
     history.push('/');
+  };
+
+  @action getUser = async () => {
+    try {
+      const user = await User.currnet();
+      runInAction('Get current user', () => {
+        this.user = user;
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  @action register = async (values: IUserFormValues) => {
+    try {
+      const user = await User.register(values);
+      runInAction('register user', () => {
+        this.user = user;
+      });
+      this.rootStore.commonStore.setToken(user.token);
+      this.rootStore.commonStore.setAppLoaded();
+      this.rootStore.modalStore.closeModal();
+      history.push('/activities');
+    } catch (err) {
+      throw err;
+    }
   };
 }
 

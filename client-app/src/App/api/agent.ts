@@ -1,11 +1,24 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import IActivity from '../Models/activitiy';
 import { history } from '../..';
 import { toast } from 'react-toastify';
 import { IUser, IUserFormValues } from '../Models/user';
+import { promises } from 'dns';
 
 //setting the base url to get the response
 axios.defaults.baseURL = 'http://localhost:5000/api';
+
+// adding token from local storage to axios requests;
+axios.interceptors.request.use(
+  (config: AxiosRequestConfig) => {
+    const token: string | null = localStorage.getItem('token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 //response interceptors for error handling
 axios.interceptors.response.use(undefined, (error) => {

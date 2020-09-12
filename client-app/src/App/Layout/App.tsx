@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext, useEffect } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import Navbar from '../../Features/Nav/Navbar';
 import { Container } from 'semantic-ui-react';
@@ -16,10 +16,29 @@ import ActivityDetails from '../../Features/Activities/Details/ActivityDetails';
 import NotFound from './NotFound';
 import { ToastContainer } from 'react-toastify';
 import LoginForm from '../../Features/user/LoginForm';
+import { RootStoreContext } from '../stores/rootStore';
+import Spinner from './Spinner';
+import ModalContainer from '../common/modals/ModalContainer';
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
+  const commonStore = useContext(RootStoreContext).commonStore;
+  const { setAppLoaded, token, appLoaded } = commonStore;
+  const { getUser } = useContext(RootStoreContext).userStore;
+
+  // get the current user based on the token that is in local storage
+  useEffect(() => {
+    if (token) {
+      getUser().finally(() => setAppLoaded());
+    } else {
+      setAppLoaded();
+    }
+  }, [getUser, setAppLoaded, token]);
+
+  if (!appLoaded) return <Spinner content='Loading App' />;
+
   return (
     <Fragment>
+      <ModalContainer />
       <ToastContainer position={'bottom-right'} />
       <Route exact path='/' component={HomePage} />
       {/* checks to see if the route is anything other than '/' and renders them */}
