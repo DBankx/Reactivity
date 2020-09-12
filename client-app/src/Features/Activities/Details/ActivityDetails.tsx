@@ -8,6 +8,7 @@ import ActivityDetailedHeader from './ActivityDetailedHeader';
 import ActivityDetailedInfo from './ActivityDetailedInfo';
 import ActivityDetailedChat from './ActivityDetailedChat';
 import ActivityDetailedSideBar from './ActivityDetailedSideBar';
+import { RootStoreContext } from '../../../App/stores/rootStore';
 
 interface IProps {
   id: string;
@@ -17,7 +18,8 @@ const ActivityDetails: React.FC<RouteComponentProps<IProps>> = ({
   match,
   history
 }) => {
-  const activityStore = useContext(ActivityStore);
+  const rootStore = useContext(RootStoreContext);
+  const activityStore = rootStore.activityStore;
   const { activity, loadingInitial, loadActivity } = activityStore;
 
   useEffect(() => {

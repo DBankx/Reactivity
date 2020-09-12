@@ -5,13 +5,15 @@ import IActivity from '../../../App/Models/activitiy';
 import ActivityStore from '../../../App/stores/activityStore';
 import { observer } from 'mobx-react-lite';
 import { format } from 'date-fns';
+import { RootStoreContext } from '../../../App/stores/rootStore';
 
 interface IProps {
   activity: IActivity;
 }
 
 const ActivityListItem: React.FC<IProps> = ({ activity }) => {
-  const activityStore = useContext(ActivityStore);
+  const rootStore = useContext(RootStoreContext);
+  const activityStore = rootStore.activityStore;
   return (
     <Segment.Group>
       <Segment>

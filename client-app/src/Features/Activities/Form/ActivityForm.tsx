@@ -21,6 +21,7 @@ import {
   composeValidators,
   hasLengthGreaterThan
 } from 'revalidate';
+import { RootStoreContext } from '../../../App/stores/rootStore';
 
 interface DetailParams {
   id: string;
@@ -46,7 +47,8 @@ const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({
   match,
   history
 }) => {
-  const activityStore = useContext(ActivityStore);
+  const rootStore = useContext(RootStoreContext);
+  const activityStore = rootStore.activityStore;
 
   // changed the state type from IActivity to ActivityFormValues class that implements the IActivityFormValues interface which makes all the fields optional,  therefore the values of the fields can be undefined and also it can map all the properties to an activity if present
   const [activity, setAcitivity] = useState(new ActivityFormValues());

@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import IActivity from '../Models/activitiy';
 import { history } from '../..';
 import { toast } from 'react-toastify';
+import { IUser, IUserFormValues } from '../Models/user';
 
 //setting the base url to get the response
 axios.defaults.baseURL = 'http://localhost:5000/api';
@@ -28,7 +29,7 @@ axios.interceptors.response.use(undefined, (error) => {
   if (error.response.status === 500) {
     toast.error('Server error - Try reloading the page');
   }
-  throw error;
+  throw error.response;
 });
 
 const responseBody = (response: AxiosResponse) => response.data;
@@ -63,6 +64,19 @@ const Activities = {
     }),
   update: (activity: IActivity) =>
     requests.put(`/activities/${activity.id}`, activity, {
+      headers: { 'Content-Type': 'application/json' }
+    })
+};
+
+// constants to register a user
+export const User = {
+  currnet: (): Promise<IUser> => requests.get('/user'),
+  login: (user: IUserFormValues): Promise<IUser> =>
+    requests.post('/user/login', user, {
+      headers: { 'Content-Type': 'application/json' }
+    }),
+  register: (user: IUserFormValues): Promise<IUser> =>
+    requests.post('/user/register', user, {
       headers: { 'Content-Type': 'application/json' }
     })
 };

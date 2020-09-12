@@ -4,13 +4,20 @@ import IActivity from '../Models/activitiy';
 import Activities from '../api/agent';
 import { history } from '../..';
 import { toast } from 'react-toastify';
+import { RootStore } from './rootStore';
 
 //configure mobx
 configure({ enforceActions: 'always' });
 //runInAction is to make all state changes be an action, so it cant be changed anywhere outside an action
 
 //activity store
-class ActivityStore {
+export default class ActivityStore {
+  rootStore: RootStore;
+
+  constructor(rootStore: RootStore) {
+    this.rootStore = rootStore;
+  }
+
   @observable activityRegistry = new Map();
   @observable loadingInitial: boolean = false;
   @observable activity: IActivity | null = null;
@@ -176,5 +183,3 @@ class ActivityStore {
     }
   };
 }
-
-export default createContext(new ActivityStore());
