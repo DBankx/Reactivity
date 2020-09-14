@@ -22,6 +22,7 @@ import {
   hasLengthGreaterThan
 } from 'revalidate';
 import { RootStoreContext } from '../../../App/stores/rootStore';
+import DamiForm from '../../../App/common/form/DamiForm';
 
 interface DetailParams {
   id: string;

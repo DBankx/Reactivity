@@ -4,14 +4,7 @@ import { Form as FinalForm, Field } from 'react-final-form';
 import { IUserFormValues } from '../../App/Models/user';
 import { Form, Button, Header } from 'semantic-ui-react';
 import TextInput from '../../App/common/form/TextInput';
-import {
-  combineValidators,
-  isRequired,
-  composeValidators,
-  hasLengthGreaterThan,
-  isAlphaNumeric
-} from 'revalidate';
-import { isRegExp } from 'util';
+import { combineValidators, isRequired } from 'revalidate';
 import ErrorMessage from '../../App/common/form/ErrorMessage';
 import { FORM_ERROR } from 'final-form';
 
@@ -19,13 +12,7 @@ const validate = combineValidators({
   email: isRequired('email'),
   username: isRequired('username'),
   displayName: isRequired('displayName'),
-  password: composeValidators(
-    isRequired('password'),
-    isAlphaNumeric('password'),
-    hasLengthGreaterThan(6)({
-      message: 'Description needs to be atleast 6 chars'
-    })
-  )()
+  password: isRequired('Password')
 });
 
 const RegisterForm = () => {
@@ -62,10 +49,7 @@ const RegisterForm = () => {
             placeholder='Password'
           />
           {submitError && !dirtySinceLastSubmit && (
-            <ErrorMessage
-              error={submitError}
-              text={JSON.stringify(submitError.data.errors)}
-            />
+            <ErrorMessage error={submitError} />
           )}
           <Button
             disabled={(pristine && !dirtySinceLastSubmit) || invalid}
