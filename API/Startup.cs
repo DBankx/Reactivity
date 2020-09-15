@@ -1,6 +1,7 @@
 using API.Middleware;
 using Application.Activities;
 using Application.Interfaces;
+using AutoMapper;
 using Domain;
 using FluentValidation.AspNetCore;
 using Infrastructure.Security;
@@ -49,7 +50,8 @@ namespace API
             services.AddCors(opt => { opt.AddDefaultPolicy(builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }); });
             //adding the mediatr service
             services.AddMediatR(typeof(List.Handler).Assembly);
-
+            // auto mapper profiles
+            services.AddAutoMapper(typeof(List.Handler).Assembly);
             //configure identity in application
             var builder = services.AddIdentityCore<ApplicationUser>();
             var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);

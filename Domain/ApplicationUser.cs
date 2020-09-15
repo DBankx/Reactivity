@@ -8,5 +8,6 @@ namespace Domain
     public class ApplicationUser : IdentityUser
     {
         public string DisplayName { get; set; }
+        public ICollection<UserActivity> UserActivities { get; set; }
     }
 }

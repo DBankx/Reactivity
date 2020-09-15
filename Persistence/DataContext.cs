@@ -15,6 +15,7 @@ namespace Persistence
 
         public DbSet<Value> Values { get; set; }
         public DbSet<Domain.Activity> Activities { get; set; }
+        public DbSet<UserActivity> UserActivities { get; set; }
 
         //to add data to the db manually (seed data)
         protected override void OnModelCreating(ModelBuilder builder)
@@ -34,8 +35,15 @@ namespace Persistence
                 Id = 3,
                 Name = "Value 103"
             });
-        }
 
-        
+            //set the primary as both the activityId and appuserid
+            builder.Entity<UserActivity>(x => x.HasKey(ua => new { ua.ApplicationUserId, ua.ActivityId }));
+
+            //building the one to many relationship between a user and userActivities
+            builder.Entity<UserActivity>().HasOne(u => u.ApplicationUser).WithMany(a => a.UserActivities).HasForeignKey(u => u.ApplicationUserId);
+
+            //one to many relationship between useractivities and a user
+            builder.Entity<UserActivity>().HasOne(a => a.Activity).WithMany(ua => ua.UserActivities).HasForeignKey(a => a.ActivityId);
+        }
     }
 }
