@@ -8,11 +8,10 @@ namespace Domain
     public class UserActivity
     {
         public string ApplicationUserId { get; set; }
-        public ApplicationUser ApplicationUser { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
         public Guid ActivityId { get; set; }
-        public Activity Activity { get; set; }
+        public virtual Activity Activity { get; set; }
         public DateTime DateJoined { get; set; }
         public bool IsHost { get; set; }
-        public ICollection<UserActivity> UserActivities { get; set; }
     }
 }

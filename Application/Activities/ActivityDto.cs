@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Application.Activities
 {
@@ -23,6 +24,7 @@ namespace Application.Activities
 
         public string Venue { get; set; }
 
+        [JsonPropertyName("attendees")]
         public ICollection<AttendeeDto> UserActivities { get; set; }
     }
 }

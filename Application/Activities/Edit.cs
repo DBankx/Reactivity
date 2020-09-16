@@ -1,7 +1,9 @@
 ﻿using Application.Errors;
+using Application.Interfaces;
 using Domain;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -56,6 +58,7 @@ namespace Application.Activities
             }
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
+
                 //find the activity that is going to be edited
                 Activity activity = await _context.Activities.FindAsync(request.Id);
 
@@ -64,7 +67,7 @@ namespace Application.Activities
                     throw new RestException(HttpStatusCode.NotFound, new { activity = "Not Found" });
                 }
 
-                //update the activity to the request property
+                    //update the activity to the request property
                 activity.Title = request.Title ?? activity.Title;
                 activity.Venue = request.Venue ?? activity.Venue;
                 activity.Description = request.Description ?? activity.Description;

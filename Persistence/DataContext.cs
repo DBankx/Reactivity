@@ -37,7 +37,9 @@ namespace Persistence
             });
 
             //set the primary as both the activityId and appuserid
-            builder.Entity<UserActivity>(x => x.HasKey(ua => new { ua.ApplicationUserId, ua.ActivityId }));
+            //builder.Entity<UserActivity>(x => x.HasKey(ua => new { ua.ApplicationUserId, ua.ActivityId }));
+
+            builder.Entity<UserActivity>().HasKey(ua => new { ua.ApplicationUserId, ua.ActivityId });
 
             //building the one to many relationship between a user and userActivities
             builder.Entity<UserActivity>().HasOne(u => u.ApplicationUser).WithMany(a => a.UserActivities).HasForeignKey(u => u.ApplicationUserId);

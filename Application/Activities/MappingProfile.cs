@@ -11,7 +11,9 @@ namespace Application.Activities
         public MappingProfile()
         {
             CreateMap<Activity, ActivityDto>();
-            CreateMap<UserActivity, AttendeeDto>();
+            CreateMap<UserActivity, AttendeeDto>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(source => source.ApplicationUser.UserName))
+                .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(source => source.ApplicationUser.DisplayName));
         }
     }
 }
