@@ -1,8 +1,12 @@
 import React, { Fragment } from 'react';
 import { Segment, List, Item, Label, Image } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
+import { IAtendee } from '../../../App/Models/activitiy';
+import { observer } from 'mobx-react-lite';
 
-const ActivityDetailedSideBar = () => {
+const ActivityDetailedSideBar: React.FC<{ attendees: IAtendee[] }> = ({
+  attendees
+}) => {
   return (
     <Fragment>
       <Segment
@@ -13,49 +17,37 @@ const ActivityDetailedSideBar = () => {
         inverted
         color='teal'
       >
-        3 People Going
+        {attendees.length} {attendees.length === 1 ? 'Person' : 'People'} going
       </Segment>
       <Segment attached>
         <List relaxed divided>
-          <Item style={{ position: 'relative' }}>
-            <Label
-              style={{ position: 'absolute' }}
-              color='orange'
-              ribbon='right'
-            >
-              Host
-            </Label>
-            <Image size='tiny' src={'/Assests/user.png'} />
-            <Item.Content verticalAlign='middle'>
-              <Item.Header as='h3'>
-                <Link to={`#`}>Bob</Link>
-              </Item.Header>
-              <Item.Extra style={{ color: 'orange' }}>Following</Item.Extra>
-            </Item.Content>
-          </Item>
+          {attendees.map((attendee) => (
+            <Item key={attendee.username} style={{ position: 'relative' }}>
+              {attendee.isHost && (
+                <Label
+                  style={{ position: 'absolute' }}
+                  color='orange'
+                  ribbon='right'
+                >
+                  Host
+                </Label>
+              )}
 
-          <Item style={{ position: 'relative' }}>
-            <Image size='tiny' src={'/Assests/user.png'} />
-            <Item.Content verticalAlign='middle'>
-              <Item.Header as='h3'>
-                <Link to={`#`}>Tom</Link>
-              </Item.Header>
-              <Item.Extra style={{ color: 'orange' }}>Following</Item.Extra>
-            </Item.Content>
-          </Item>
-
-          <Item style={{ position: 'relative' }}>
-            <Image size='tiny' src={'/Assests/user.png'} />
-            <Item.Content verticalAlign='middle'>
-              <Item.Header as='h3'>
-                <Link to={`#`}>Sally</Link>
-              </Item.Header>
-            </Item.Content>
-          </Item>
+              <Image size='tiny' src={attendee.image || '/Assests/user.png'} />
+              <Item.Content verticalAlign='middle'>
+                <Item.Header as='h3'>
+                  <Link to={`/profile/${attendee.username}`}>
+                    {attendee.username}
+                  </Link>
+                </Item.Header>
+                <Item.Extra style={{ color: 'orange' }}>Following</Item.Extra>
+              </Item.Content>
+            </Item>
+          ))}
         </List>
       </Segment>
     </Fragment>
   );
 };
 
-export default ActivityDetailedSideBar;
+export default observer(ActivityDetailedSideBar);

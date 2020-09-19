@@ -4,6 +4,7 @@ import { history } from '../..';
 import { toast } from 'react-toastify';
 import { IUser, IUserFormValues } from '../Models/user';
 import { promises } from 'dns';
+import { request } from 'http';
 
 //setting the base url to get the response
 axios.defaults.baseURL = 'http://localhost:5000/api';
@@ -78,7 +79,16 @@ const Activities = {
   update: (activity: IActivity) =>
     requests.put(`/activities/${activity.id}`, activity, {
       headers: { 'Content-Type': 'application/json' }
-    })
+    }),
+  attend: (id: string) =>
+    requests.post(
+      `/activities/${id}/attend`,
+      {},
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    ),
+  unAttend: (id: string) => requests.delete(`/activity/${id}/unattend`)
 };
 
 // constants to register a user

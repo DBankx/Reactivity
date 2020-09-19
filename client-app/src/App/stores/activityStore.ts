@@ -1,10 +1,12 @@
 import { observable, action, computed, configure, runInAction } from 'mobx';
 import { createContext, SyntheticEvent } from 'react';
-import IActivity from '../Models/activitiy';
+import IActivity, { IAtendee } from '../Models/activitiy';
 import Activities from '../api/agent';
 import { history } from '../..';
 import { toast } from 'react-toastify';
 import { RootStore } from './rootStore';
+import { IUser } from '../Models/user';
+import { Agent } from 'http';
 
 //configure mobx
 configure({ enforceActions: 'always' });
@@ -23,6 +25,7 @@ export default class ActivityStore {
   @observable activity: IActivity | null = null;
   @observable submitting: boolean = false;
   @observable target: string = '';
+  @observable loading: boolean = false;
 
   //====computed=====
   @computed get activitiesByDate() {
@@ -51,11 +54,20 @@ export default class ActivityStore {
   //===actions====
   @action loadActivities = async () => {
     this.loadingInitial = true;
+    const user = this.rootStore.userStore.user!;
     try {
       const activities: IActivity[] = await Activities.list();
       runInAction('loading activities', () => {
         activities.forEach((activity) => {
           activity.date = new Date(activity.date);
+          // check if the current user is attending this activity
+          activity.isGoing = activity.attendees.some(
+            (a) => a.username === user.username
+          );
+          // check if the user is host of the activity
+          activity.isHost = activity.attendees.some(
+            (a) => a.username === user.username && a.isHost
+          );
           this.activityRegistry.set(activity.id, activity);
         });
         this.loadingInitial = false;
@@ -76,6 +88,7 @@ export default class ActivityStore {
   //loads the activity either from the dicitonary or from the api to reduce server load;
   @action loadActivity = async (id: string) => {
     let activity: IActivity = this.getActivity(id);
+    const user: IUser = this.rootStore.userStore.user!;
     if (activity) {
       this.activity = activity;
       return activity;
@@ -85,6 +98,14 @@ export default class ActivityStore {
         activity = await Activities.details(id);
         runInAction('getting activity', () => {
           activity.date = new Date(activity.date);
+          // check if the current user is attending this activity
+          activity.isGoing = activity.attendees.some(
+            (a) => a.username === user.username
+          );
+          // check if the user is host of the activity
+          activity.isHost = activity.attendees.some(
+            (a) => a.username === user.username && a.isHost
+          );
           this.activity = activity;
           this.activityRegistry.set(activity.id, activity);
           this.loadingInitial = false;
@@ -119,6 +140,22 @@ export default class ActivityStore {
     this.submitting = true;
     try {
       await Activities.create(activity);
+
+      const user = this.rootStore.userStore.user!;
+
+      // create a new attendance and push it to the activity
+      const attendance: IAtendee = {
+        displayName: user.displayName,
+        image: user.image!,
+        isHost: true,
+        username: user.username
+      };
+
+      let attendees = [];
+      attendees.push(attendance);
+
+      activity.attendees = attendees;
+
       runInAction('create activity', () => {
         // adding the new activity to the activities dictionary
         this.activityRegistry.set(activity.id, activity);
@@ -180,6 +217,59 @@ export default class ActivityStore {
         this.submitting = false;
       });
       console.log(err);
+    }
+  };
+
+  // attend an activity
+  @action attendActivity = async () => {
+    const user = this.rootStore.userStore.user!;
+    this.loading = true;
+    try {
+      await Activities.attend(this.activity!.id);
+      runInAction('attending an activity', () => {
+        // create an attendee object
+        const attendance: IAtendee = {
+          displayName: user.displayName,
+          image: user.image!,
+          isHost: false,
+          username: user.username
+        };
+
+        // push the new attendance to the activity attendees array
+        if (this.activity) {
+          this.activity.attendees.push(attendance);
+          this.activity.isGoing = true;
+          this.activityRegistry.set(this.activity.id, this.activity);
+          this.loading = false;
+        }
+      });
+    } catch (error) {
+      runInAction('attending error', () => {
+        this.loading = false;
+      });
+      toast.error('Problem signing up to activity');
+    }
+  };
+
+  // cancel an attendance
+  @action cancelAttendance = async () => {
+    const user = this.rootStore.userStore.user!;
+    this.loading = true;
+    try {
+      await Activities.unAttend(this.activity!.id);
+      if (this.activity) {
+        this.activity.attendees = this.activity.attendees.filter(
+          (x) => x.username != user.username
+        );
+        this.activity.isGoing = false;
+        this.activityRegistry.set(this.activity.id, this.activity);
+        this.loading = false;
+      }
+    } catch (error) {
+      runInAction(() => {
+        this.loading = false;
+      });
+      toast.error('Problem cancelling activity');
     }
   };
 }

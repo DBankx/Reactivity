@@ -8,6 +8,9 @@ export default interface IActivity {
   city: string;
   date: Date;
   venue: string;
+  isGoing: boolean;
+  isHost: boolean;
+  attendees: IAtendee[];
 }
 
 //Partial makes all the values in IActivity optional "?"
@@ -32,4 +35,11 @@ export class ActivityFormValues implements IActivityFormValues {
     }
     Object.assign(this, init);
   }
+}
+
+export interface IAtendee {
+  username: string;
+  displayName: string;
+  image: string;
+  isHost: boolean;
 }

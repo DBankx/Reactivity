@@ -45,8 +45,8 @@ namespace Application.Activities
                     throw new RestException(System.Net.HttpStatusCode.NotFound, new { activity = "Not found" });
                 }
 
-                // find the person is already attending the activity
-                var attendance = await _context.UserActivities.SingleOrDefaultAsync(x => x.ActivityId == activity.Id && x.ApplicationUserId == x.ApplicationUserId);
+                // find if the person is already attending the activity
+                var attendance = await _context.UserActivities.SingleOrDefaultAsync(x => x.ActivityId == activity.Id && x.ApplicationUserId == user.Id);
 
                 if(attendance != null)
                 {

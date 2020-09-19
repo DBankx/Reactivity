@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
 using System.Text;
+using Infrastructure.Photos;
 
 namespace API
 {
@@ -89,6 +90,9 @@ namespace API
 
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IUserAccessor, UserAccessor>();
+            // configuring the cloudinary settings file, this makes it stringly typed to the values in the user-secrets enviroment variable in the system
+            services.Configure<CloudinarySettings>(Configuration.GetSection(("Cloudinary")));
+            services.AddScoped<IPhotoAccessor, PhotoAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -17,6 +17,8 @@ namespace Persistence
         public DbSet<Domain.Activity> Activities { get; set; }
         public DbSet<UserActivity> UserActivities { get; set; }
 
+        public DbSet<Photo> Photos { get; set; }
+
         //to add data to the db manually (seed data)
         protected override void OnModelCreating(ModelBuilder builder)
         {
