@@ -20,6 +20,7 @@ import { RootStoreContext } from '../stores/rootStore';
 import Spinner from './Spinner';
 import ModalContainer from '../common/modals/ModalContainer';
 import DamiForm from '../common/form/DamiForm';
+import ProfilePage from '../../Features/profiles/ProfilePage';
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
   const commonStore = useContext(RootStoreContext).commonStore;
@@ -63,8 +64,9 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
                   path={['/createActivity', '/manage/:id']}
                   component={ActivityForm}
                 />
-                <Route exact path='/login' component={LoginForm} />
+                  <Route exact path='/profile/:username' component={ProfilePage} />
                 <Route exact path='/dami' component={DamiForm} />
+                  
                 <Route component={NotFound} />
               </Switch>
             </Container>

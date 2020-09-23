@@ -18,6 +18,8 @@ namespace Persistence
         public DbSet<UserActivity> UserActivities { get; set; }
 
         public DbSet<Photo> Photos { get; set; }
+        
+        public DbSet<Comment> Comments { get; set; }
 
         //to add data to the db manually (seed data)
         protected override void OnModelCreating(ModelBuilder builder)

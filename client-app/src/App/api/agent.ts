@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { IUser, IUserFormValues } from '../Models/user';
 import { promises } from 'dns';
 import { request } from 'http';
+import { IProfile, IPhoto, IProfileFormValues } from '../Models/profile';
 
 //setting the base url to get the response
 axios.defaults.baseURL = 'http://localhost:5000/api';
@@ -64,7 +65,13 @@ const requests = {
   put: (url: string, body: {}, config: {}) =>
     axios.put(url, body, config).then(sleep(1000)).then(responseBody),
   delete: (url: string) =>
-    axios.delete(url).then(sleep(1000)).then(responseBody)
+    axios.delete(url).then(sleep(1000)).then(responseBody),
+    // sending a post request
+    postForm: (url: string, file: Blob) => {
+      let formData = new FormData();
+      formData.append("File", file);
+      return axios.post(url, formData, {headers:{"Content-type": "multipart/form-data"}}).then(responseBody);
+    }
 };
 
 //constants for the activity feature
@@ -103,5 +110,14 @@ export const User = {
       headers: { 'Content-Type': 'application/json' }
     })
 };
+
+// profile data
+export const Profile = {
+    get: (username: string): Promise<IProfile> => requests.get(`/profiles/${username}`),
+    uploadPhoto: (photo: Blob): Promise<IPhoto> => requests.postForm(`/photos`, photo),
+    setMainPhoto: (id: string) => requests.post(`/photos/${id}/setmain`, {}, {headers:{"Content-type": "application/json"}}),
+    deletePhoto: (id: string) => requests.delete(`/photos/${id}`),
+    edit: (values: IProfileFormValues) => requests.put("/profiles", values, {headers: {"Content-type": "application/json"}})
+}
 
 export default Activities;

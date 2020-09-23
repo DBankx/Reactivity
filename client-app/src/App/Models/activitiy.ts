@@ -11,6 +11,16 @@ export default interface IActivity {
   isGoing: boolean;
   isHost: boolean;
   attendees: IAtendee[];
+  comments: IComment[];
+}
+
+export interface IComment{
+  displayName: string;
+  body: string;
+  id: string;
+  createdAt: Date;
+  username: string;
+  image: string;
 }
 
 //Partial makes all the values in IActivity optional "?"

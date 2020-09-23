@@ -13,7 +13,7 @@ namespace Infrastructure.Photos
         // create a private cloudinary field
         private readonly Cloudinary _cloudinary;
         
-        public PhotoAccessor(IOptions<CloudinarySettings> config)
+        public PhotoAccessor()
         {
             // initialize a new cloudinary instance with the url gotten from the webpage
             _cloudinary = new Cloudinary("cloudinary://351243614951183:yaHfOEa8Rpxvi03JrSpnHbLDY1Y@dbankx");
@@ -29,7 +29,8 @@ namespace Infrastructure.Photos
                 {
                     var uploadParams = new ImageUploadParams
                     {
-                        File = new FileDescription(file.FileName, filestream),                        // setting the trasnformation **optional** 
+                        File = new FileDescription(file.FileName, filestream),                       
+                        // setting the trasnformation **optional** 
                         Transformation = new Transformation().Height(500).Width(500).Crop("fill").Gravity("face")
                     };
 

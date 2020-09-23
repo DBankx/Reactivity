@@ -1,12 +1,12 @@
-import { observable, action, computed, configure, runInAction } from 'mobx';
-import { createContext, SyntheticEvent } from 'react';
-import IActivity, { IAtendee } from '../Models/activitiy';
+import {action, computed, configure, observable, runInAction} from 'mobx';
+import {SyntheticEvent} from 'react';
+import IActivity, {IAtendee} from '../Models/activitiy';
 import Activities from '../api/agent';
-import { history } from '../..';
-import { toast } from 'react-toastify';
-import { RootStore } from './rootStore';
-import { IUser } from '../Models/user';
-import { Agent } from 'http';
+import {history} from '../..';
+import {toast} from 'react-toastify';
+import {RootStore} from './rootStore';
+import {IUser} from '../Models/user';
+import {HubConnection, HubConnectionBuilder, LogLevel} from "@microsoft/signalr";
 
 //configure mobx
 configure({ enforceActions: 'always' });
@@ -26,6 +26,28 @@ export default class ActivityStore {
   @observable submitting: boolean = false;
   @observable target: string = '';
   @observable loading: boolean = false;
+  // hub connection for signalr (null and only connects when they are in the activity details page ---- Thats where the chat system is)
+  @observable.ref hubConnnection: HubConnection | null = null;
+  
+  // creating a new hub connnection
+  @action createHubConnection = () => {
+    this.hubConnnection = new HubConnectionBuilder().withUrl("http://localhost:5000/chat", {
+      // pass the token from the user store to the server hub
+      accessTokenFactory: () => this.rootStore.commonStore.token!
+    }).configureLogging(LogLevel.Information).build();
+    
+    // start the connection
+    this.hubConnnection.start().then(() => console.log(this.hubConnnection!.state)).catch(error => console.log("error establishing connection", error));
+    
+    this.hubConnnection.on("RecieveComment", comment => {
+      this.activity!.comments.unshift(comment);
+    })
+  }
+  
+  // stop hub connection
+  @action stopHubConnection = () => {
+    this.hubConnnection!.stop();
+  }
 
   //====computed=====
   @computed get activitiesByDate() {
