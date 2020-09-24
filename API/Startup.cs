@@ -54,7 +54,7 @@ namespace API
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
             //adding cors
-            services.AddCors(opt => { opt.AddDefaultPolicy(builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }); });
+            services.AddCors(opt => { opt.AddDefaultPolicy(builder => { builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader().AllowCredentials(); }); });
             //adding the mediatr service
             services.AddMediatR(typeof(List.Handler).Assembly);
             // auto mapper profiles

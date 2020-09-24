@@ -1,6 +1,6 @@
 import {action, computed, configure, observable, runInAction} from 'mobx';
 import {SyntheticEvent} from 'react';
-import IActivity, {IAtendee} from '../Models/activitiy';
+import IActivity, {IAtendee, IComment} from '../Models/activitiy';
 import Activities from '../api/agent';
 import {history} from '../..';
 import {toast} from 'react-toastify';
@@ -30,23 +30,45 @@ export default class ActivityStore {
   @observable.ref hubConnnection: HubConnection | null = null;
   
   // creating a new hub connnection
-  @action createHubConnection = () => {
+  @action createHubConnection = (activityId: string) => {
     this.hubConnnection = new HubConnectionBuilder().withUrl("http://localhost:5000/chat", {
       // pass the token from the user store to the server hub
       accessTokenFactory: () => this.rootStore.commonStore.token!
     }).configureLogging(LogLevel.Information).build();
     
     // start the connection
-    this.hubConnnection.start().then(() => console.log(this.hubConnnection!.state)).catch(error => console.log("error establishing connection", error));
+    this.hubConnnection.start().then(() => console.log(this.hubConnnection!.state)).then(() => {
+      // connect to the activity group using the id
+      console.log("Attempting to join group");
+      this.hubConnnection!.invoke("AddToGroup", activityId);
+    }).catch(error => console.log("error establishing connection", error));
     
     this.hubConnnection.on("RecieveComment", comment => {
-      this.activity!.comments.unshift(comment);
+      runInAction(() => {
+        this.activity!.comments.push(comment);  
+      })
     })
+    
+    // to notify people on the page if someone has joined the activity chat
+   /* this.hubConnnection.on("Send", message => {
+      toast.info(message);
+    })*/
   }
   
   // stop hub connection
   @action stopHubConnection = () => {
-    this.hubConnnection!.stop();
+    this.hubConnnection!.invoke("RemoveFromGroup", this.activity!.id).then(() =>
+        this.hubConnnection!.stop()).then(() => console.log("Connection stopped")).catch((err) => console.log(err))
+  }
+  
+  @action addComment = async (values: any) => {
+    values.activityId = this.activity!.id;
+    try{
+      await this.hubConnnection!.invoke("SendComment", values);
+    }catch(error){
+      console.log(error);
+    }
+    
   }
 
   //====computed=====
@@ -177,6 +199,7 @@ export default class ActivityStore {
       attendees.push(attendance);
 
       activity.attendees = attendees;
+      activity.comments = [];
 
       runInAction('create activity', () => {
         // adding the new activity to the activities dictionary
