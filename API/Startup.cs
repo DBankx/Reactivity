@@ -21,6 +21,7 @@ using Persistence;
 using System.Text;
 using System.Threading.Tasks;
 using API.SignalR;
+using Application.Profiles;
 using Infrastructure.Photos;
 
 namespace API
@@ -112,6 +113,7 @@ namespace API
             // configuring the cloudinary settings file, this makes it stringly typed to the values in the user-secrets enviroment variable in the system
             services.Configure<CloudinarySettings>(Configuration.GetSection(("Cloudinary")));
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.AddScoped<IProfileReader, ProfileReader>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

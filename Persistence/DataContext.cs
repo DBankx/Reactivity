@@ -20,6 +20,8 @@ namespace Persistence
         public DbSet<Photo> Photos { get; set; }
         
         public DbSet<Comment> Comments { get; set; }
+        
+        public DbSet<UserFollowing> Followings { get; set; }
 
         //to add data to the db manually (seed data)
         protected override void OnModelCreating(ModelBuilder builder)
@@ -50,6 +52,15 @@ namespace Persistence
 
             //one to many relationship between useractivities and a user
             builder.Entity<UserActivity>().HasOne(a => a.Activity).WithMany(ua => ua.UserActivities).HasForeignKey(a => a.ActivityId);
+
+            builder.Entity<UserFollowing>().HasKey(uf => new {uf.ObserverId, uf.TargetId});
+
+            builder.Entity<UserFollowing>().HasOne(o => o.Observer).WithMany(t => t.Followings)
+                .HasForeignKey(o => o.ObserverId).OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserFollowing>().HasOne(t => t.Target).WithMany(f => f.Followers)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

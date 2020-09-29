@@ -20,27 +20,18 @@ namespace Application.Profiles
 
         public class Handler : IRequestHandler<Query, Profile>
         {
-            private readonly DataContext _context;
+            private readonly IProfileReader _profileReader;
 
-            public Handler(DataContext context)
+            public Handler(IProfileReader profileReader)
             {
-                _context = context;
+                _profileReader = profileReader;
             }
 
             public async Task<Profile> Handle(Query request, CancellationToken cancellationToken)
             {
-                var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == request.Username);
-                
-                if(user == null) throw new RestException(HttpStatusCode.NotFound, new {user = "not found"});
-                
-                return new Profile
-                {
-                    Username = user.UserName,
-                    Bio = user.Bio,
-                    DisplayName = user.DisplayName,
-                    Photos = user.Photos,
-                    Image = user.Photos.FirstOrDefault(x => x.IsMain == true)?.Url
-                };
+                var profile = await  _profileReader.ReadProfile(request.Username);
+
+                return profile;
             }
         }
     }
